@@ -8,6 +8,9 @@
     <meta name="author" content="Potential Ventures Limited" />
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" />
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" />	
+	
+        <link rel="stylesheet" href="/theme/css/pygment.css" />
+        <link rel="stylesheet" href="/theme/css/voidybootstrap.css" />
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -121,7 +124,7 @@
 </div>
 <div class="section" id="modelling-made-easy">
 <h2>Modelling made easy</h2>
-<p>We've also seen an example of reuse in the code above, taking advantage Avalon support built-in to Cocotb, but what about the model function that is required to determine whether the RTL is behaving correctly?  Can Python help us there?</p>
+<p>We've also seen an example of reuse in the code above, taking advantage of the Avalon support built-in to Cocotb, but what about the model function that is required to determine whether the RTL is behaving correctly?  Can Python help us there?</p>
 <p>Using a packet library called <a class="reference external" href="http://www.secdev.org/projects/scapy/">Scapy</a>, our initial model becomes straightforward:</p>
 <div class="highlight"><pre><span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snooped_data_in</span><span class="p">):</span>
     <span class="n">pkt</span> <span class="o">=</span> <span class="n">Ether</span><span class="p">(</span><span class="n">snooped_data_in</span><span class="p">)</span>
@@ -143,7 +146,7 @@
     <span class="k">for</span> <span class="n">pkt</span> <span class="ow">in</span> <span class="n">PcapReader</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
         <span class="k">yield</span> <span class="n">tb</span><span class="o">.</span><span class="n">stream_in</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pkt</span><span class="p">))</span>
 </pre></div>
-<p>In the space a few minutes and with fewer than 25 lines of code we've created a structured testbench and a model and written a test that can take PCAP files and send them through the testbench.</p>
+<p>In the space of a few minutes and with fewer than 25 lines of code we've created a structured testbench and a model and written a test that can take PCAP files and send them through the testbench.</p>
 </div>
 <div class="section" id="in-summary">
 <h2>In summary</h2>
@@ -190,7 +193,7 @@
 
 <h4><i class="fa fa-tags fa-fw fa-lg"></i> Tags</h4>
 <p class="tag-cloud">
-<span class="tag-4">
+<span class="tag-1">
     <a href="/tag/eda.html">
         <i class="fa fa-tag fa-fw fa-lg"></i>EDA
     </a>
