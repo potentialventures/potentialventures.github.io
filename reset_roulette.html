@@ -105,7 +105,7 @@ recommend using asynchronous resets (that are synchronously de-asserted). So if
 we are writing code that we intend to be portable, which reset strategy should
 we employ?</p>
 <p>Secondly we have the possibility that we may accidentally infer additional
-logic around our reset.  If a clocked process with an asynchronous reset
+logic around our reset.  In a clocked process with an asynchronous reset
 the synthesis tool will insert a clock-enable for any flip-flops that
 aren't reset.  This typically doesn't map to a native architecture and
 as we'll see below can lead to extra logic being inserted into the design,
@@ -141,15 +141,15 @@ end
 flip-flop.  At first glance it's easy to miss the implications of this, but
 taking a look at the technology mapped implementation the problem is evident:</p>
 <img alt="alternate text" class="align-center" src="images/reset_tech_error.png" style="width: 700px;" />
-<p>We can now see that the mapper has inserted a LUT between <tt class="docutils literal">data_b</tt> and our
+<p>We can now see that the fitter has inserted a LUT between <tt class="docutils literal">data_b</tt> and our
 flip-flop.  Since there is no native support for an asynchronous enable in
 the Altera flip-flops, Quartus has to emulate this capability by feeding the
 output of the flop back into a LUT.</p>
-<p>This if course adds an extra level of logic to the path, using more routing
+<p>This of course adds an extra level of logic to the path, using more routing
 resources, eating into our timing margin and consuming LUTs unnecessarily.</p>
 <p>We've used SystemVerilog features to improve the quality of the code, grouping
 signals together into a <tt class="docutils literal">struct</tt> and taking advantage of the the additional
-protection provided by <tt class="docutils literal">always_ff</tt>.  These features exacerbate our
+protection provided by <tt class="docutils literal">always_ff</tt>.  These features <em>exacerbate</em> our
 difficulties.  We cannot split <tt class="docutils literal">state.b</tt> into a separate process since the
 <tt class="docutils literal">always_ff</tt> construct prevents us from driving <tt class="docutils literal">state</tt> from multiple
 processes.</p>
@@ -254,14 +254,14 @@ without resets into the same process.</p>
 
 <h4><i class="fa fa-tags fa-fw fa-lg"></i> Tags</h4>
 <p class="tag-cloud">
-<span class="tag-1">
-    <a href="/tag/eda.html">
-        <i class="fa fa-tag fa-fw fa-lg"></i>EDA
-    </a>
-</span>
 <span class="tag-4">
     <a href="/tag/fpga.html">
         <i class="fa fa-tag fa-fw fa-lg"></i>FPGA
+    </a>
+</span>
+<span class="tag-1">
+    <a href="/tag/eda.html">
+        <i class="fa fa-tag fa-fw fa-lg"></i>EDA
     </a>
 </span>
 </p>
