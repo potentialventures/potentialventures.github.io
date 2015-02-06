@@ -74,6 +74,41 @@
     <article>
 <div class="article-header">
     <abbr class="article-prehead">
+	  Fri 06 February 2015
+	</abbr> <!-- /.article-prehead -->
+	<h1>
+	  <a href="/verification_futures_2015.html" rel="bookmark"
+		 title="Permalink to Verification Futures 2015">
+		Verification Futures 2015
+	  </a>
+	</h1>
+    <div class="article-posthead">
+	  <p>
+          Posted by <a href="/author/chris-higgs.html">Chris Higgs</a>
+		in 
+		<a href="/category/blog.html">
+		  Blog</a>
+		&nbsp;&nbsp;
+	  </p>
+	</div> <!-- /.article-posthead -->
+</div> <!-- /.article-header -->
+	    <div class="content-body">
+		<p>There was a good turnout at Verification Futures in Reading yesterday.  It was great to meet with other engineers and vendors, swap stories and catch up.</p>
+<p>It was also interesting to hear about the verification challenges faced by larger organisations and pitches from some of the vendors for their latest and greatest solutions.  It was clear that there's an <strong>undercurrent of frustration</strong> with the tools - a great comment from Wez Davey explaining the understandable reaction to a 3 man month budget for fighting tool bugs in a project!  It sounds ridiculous, but these are the realities of our environment.</p>
+<p>There were also many remarks about the <strong>UVM</strong>, almost &quot;Universally&quot; negative.  Execution is too slow (and getting slower), it's too complex, too difficult to use outside of simulation and takes too long to learn.  Hardly glowing praise of the industries favourite methodology!</p>
+<p><strong>Python</strong> is definitely gaining traction in the EDA world.  For example Wez Davey revealed that Python is used extensively in DisplayLink for writing portable tests that can run against simulation, FPGA prototyping platforms or the fabbed ASIC.  Interestingly he commented that this Python framework originated from the software / firmware teams and had been adopted as an integral part of their ASIC development flow.</p>
+<p>We saw several other cases where adoption of improved development flows have <strong>spilled over from the software teams</strong>.  Alan Fitch explained that the software group had already implemented Jenkins for Continuous Integration, helping the FPGA team avoid the common pitfall of inventing their own mechanism using TCL.</p>
+<p>Agile was mentioned in passing in several of the presentations.  We gave a brief presentation about <strong>applying agile techniques to FPGA development</strong> and based on the discussions afterwards this is a popular topic.  Here are the slides:</p>
+<iframe src="https://docs.google.com/presentation/d/1M35-rU6OOi0UIqidifVVngB015ycS7m4HFdgyaBnLjE/embed?start=false&loop=false&delayms=3000" frameborder="0" width="960" height="749" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+<p class="content-emphasis">
+&nbsp;
+</p>	  </div>
+    </article>
+
+    <hr />
+    <article>
+<div class="article-header">
+    <abbr class="article-prehead">
 	  Thu 29 January 2015
 	</abbr> <!-- /.article-prehead -->
 	<h1>
@@ -92,131 +127,13 @@
 	  </p>
 	</div> <!-- /.article-posthead -->
 </div> <!-- /.article-header -->
-	    <div class="content-body">
-		<p>Resets have always been a source of occasional aggravation for FPGA designers.
-This blog post expands on a <a class="reference external" href="http://stackoverflow.com/a/21477457/579887">StackOverflow answer</a> I wrote a while ago
-describing some of the gotchas.</p>
-<div class="section" id="confusing-conflicts">
-<h2>Confusing Conflicts</h2>
-<p>If we explore the problem space we can see why resets can be tricky.</p>
-<p>Firstly we have different best practice advice from the major FPGA vendors.
-<a class="reference external" href="http://www.xilinx.com/support/documentation/white_papers/wp272.pdf">Xilinx</a> advise users implement synchronous resets, whereas <a class="reference external" href="http://www.altera.co.uk/literature/hb/qts/qts_qii5v1.pdf">Altera</a>
-recommend using asynchronous resets (that are synchronously de-asserted). So if
-we are writing code that we intend to be portable, which reset strategy should
-we employ?</p>
-<p>Secondly we have the possibility that we may accidentally infer additional
-logic around our reset.  In a clocked process with an asynchronous reset
-the synthesis tool will insert a clock-enable for any flip-flops that
-aren't reset.  This typically doesn't map to a native architecture and
-as we'll see below can lead to extra logic being inserted into the design,
-slowing timing and increasing resource usage.</p>
-<p>Recommendations vary - from <a class="reference external" href="http://www.sunburst-design.com/papers/CummingsSNUG2003Boston_Resets.pdf">Cliff Cummings</a> recommendation of writing
-separate processes for flops that are reset and flops that aren't, to
-<a class="reference external" href="http://www.xilinx.com/support/documentation/white_papers/wp272.pdf">Xilinx</a> encouraging users to reset using reconfiguration of the device
-rather than a using a global reset.</p>
-</div>
-<div class="section" id="unintended-consequences">
-<h2>Unintended Consequences</h2>
-<p>Let's take a closer look at the issues when combining flip flops that aren't
-reset in the same process as flops that are.  Consider the following example:</p>
-<div class="highlight"><pre>typedef struct packed {
-    logic               a;
-    logic               b;
-} state_t;
+      <div class="summary">
+		<p class="first last">Is it possible to write portable reset code?</p>
 
-state_t                 state;
-
-always_ff @(posedge clk or negedge areset_n) begin
-    if (~areset_n) begin
-        state.a         &lt;= 1&#39;b0;
-    end else begin
-        state.a         &lt;= data_a;
-        state.b         &lt;= data_b;
-   end
-end
-</pre></div>
-<p>Using Quartus, the code above results in the following logic:</p>
-<img alt="alternate text" class="align-center" src="images/reset_logic_error.png" style="width: 500px;" />
-<p>We see that <tt class="docutils literal">areset_n</tt> has been connected to <tt class="docutils literal">ENA</tt> of the <tt class="docutils literal">state.b</tt>
-flip-flop.  At first glance it's easy to miss the implications of this, but
-taking a look at the technology mapped implementation the problem is evident:</p>
-<img alt="alternate text" class="align-center" src="images/reset_tech_error.png" style="width: 700px;" />
-<p>We can now see that the fitter has inserted a LUT between <tt class="docutils literal">data_b</tt> and our
-flip-flop.  Since there is no native support for an asynchronous enable in
-the Altera flip-flops, Quartus has to emulate this capability by feeding the
-output of the flop back into a LUT.</p>
-<p>This of course adds an extra level of logic to the path, using more routing
-resources, eating into our timing margin and consuming LUTs unnecessarily.</p>
-<p>We've used SystemVerilog features to improve the quality of the code, grouping
-signals together into a <tt class="docutils literal">struct</tt> and taking advantage of the the additional
-protection provided by <tt class="docutils literal">always_ff</tt>.  These features <em>exacerbate</em> our
-difficulties.  We cannot split <tt class="docutils literal">state.b</tt> into a separate process since the
-<tt class="docutils literal">always_ff</tt> construct prevents us from driving <tt class="docutils literal">state</tt> from multiple
-processes.</p>
-<p>As described in the <a class="reference external" href="http://stackoverflow.com/a/21477457/579887">StackOverflow answer</a>, we can avoid inferring the
-unneccessary logic by assigning <tt class="docutils literal">state.b &lt;= 'x;</tt> in the reset condition.
-This has the same effect as a not-resetting the flip-flop, as we can see
-in this schematic:</p>
-<img alt="alternate text" class="align-center" src="images/reset_fixed.png" style="width: 500px;" />
-<p>But is it possible to improve on this?</p>
-</div>
-<div class="section" id="what-does-good-look-like">
-<h2>What does good look like?</h2>
-<p>When I'm coding some awesome new chunk of hardware, I really don't want to
-worry about resets at all!  It's fluff that should not get in the way of the
-fun stuff.  What we'd like is something enable us to:</p>
-<ul class="simple">
-<li>Abstract active low or active high reset</li>
-<li>Abstract synchronous or asynchronous reset</li>
-<li>Write code that ports between different architectures</li>
-<li>Mix flops that are reset and flops that aren't reset in the same process</li>
-</ul>
-<p>So how might we achieve something like that?</p>
-</div>
-<div class="section" id="mighty-macros">
-<h2>Mighty Macros</h2>
-<p>To abstract away the difference between asynchronous or synchronous resets
-we need to change whether the reset signal appears in the sensitivity list
-of the clocked process.  We could do this using a generate statement, but
-in this instance a macro is cleaner.</p>
-<p>So we simply define a <tt class="docutils literal">CLOCKED_PROCESS</tt> macro and a <tt class="docutils literal">RESET_CONDITION</tt>
-macro and our code looks like this:</p>
-<div class="highlight"><pre>`CLOCKED_PROCESS(clk, reset) begin
-    `RESET_CONDITION begin
-        state           &lt;= &#39;x;
-        state.a         &lt;= 1&#39;b0;
-    end else begin
-        state.a         &lt;= data_a;
-        state.b         &lt;= data_b;
-    end
-end
-</pre></div>
-<p>Behind the scenes our <tt class="docutils literal">CLOCKED_PROCESS</tt> macro checks whether the
-architecture is active high or active low reset and defines two further
-macros, <tt class="docutils literal">_RESET_EVENT</tt> and <tt class="docutils literal">RESET_CONDITION</tt>:</p>
-<div class="highlight"><pre>`ifdef ARCH_ACTIVE_HIGH_RESET
-`define _RESET_EVENT(_reset) posedge _reset
-`define RESET_CONDITION(_reset) if (_reset)
-`elsif ARCH_ACIVE_LOW_RESET
-`define _RESET_EVENT(_reset) negedge _reset
-`define RESET_CONDITION(_reset) if (~_reset)
-`endif
-</pre></div>
-<p>We can then abstract away the synchronous or asynchronous reset:</p>
-<div class="highlight"><pre>`ifdef ARCH_RESET_IS_SYNCHRONOUS
-`define CLOCKED_PROCESS(_clk, _reset) always_ff @(posedge _clk)
-`elsif ARCH_RESET_IS_ASYNCHRONOUS
-`define CLOCKED_PROCESS(_clk, _reset) always_ff @(posedge _clk or `_RESET_EVENT(_reset))
-`endif
-</pre></div>
-<p>So there we have it, portable code that works with active-high or active-low
-reset, synchronous or asynchronous, <em>and</em> we can combine flip-flops with and
-without resets into the same process.</p>
-</div>
-
-<p class="content-emphasis">
-&nbsp;
-</p>	  </div>
+		<p class="content-emphasis"><a href="/reset_roulette.html">
+			Read more... <i class="fa fa-arrow-circle-right fa-fw fa-lg"></i> 
+		</a></p>
+      </div>
     </article>
 
     <hr />
@@ -322,6 +239,31 @@ without resets into the same process.</p>
 
 <h4><i class="fa fa-tags fa-fw fa-lg"></i> Tags</h4>
 <p class="tag-cloud">
+<span class="tag-4">
+    <a href="/tag/uvm.html">
+        <i class="fa fa-tag fa-fw fa-lg"></i>UVM
+    </a>
+</span>
+<span class="tag-4">
+    <a href="/tag/python.html">
+        <i class="fa fa-tag fa-fw fa-lg"></i>Python
+    </a>
+</span>
+<span class="tag-4">
+    <a href="/tag/agile.html">
+        <i class="fa fa-tag fa-fw fa-lg"></i>Agile
+    </a>
+</span>
+<span class="tag-4">
+    <a href="/tag/documentation.html">
+        <i class="fa fa-tag fa-fw fa-lg"></i>Documentation
+    </a>
+</span>
+<span class="tag-4">
+    <a href="/tag/wavedrom.html">
+        <i class="fa fa-tag fa-fw fa-lg"></i>WaveDrom
+    </a>
+</span>
 <span class="tag-4">
     <a href="/tag/fpga.html">
         <i class="fa fa-tag fa-fw fa-lg"></i>FPGA
