@@ -182,7 +182,7 @@ in this instance a macro is cleaner.</p>
 <p>So we simply define a <tt class="docutils literal">CLOCKED_PROCESS</tt> macro and a <tt class="docutils literal">RESET_CONDITION</tt>
 macro and our code looks like this:</p>
 <div class="highlight"><pre>`CLOCKED_PROCESS(clk, reset) begin
-    `RESET_CONDITION begin
+    `RESET_CONDITION(reset) begin
         state           &lt;= &#39;x;
         state.a         &lt;= 1&#39;b0;
     end else begin
